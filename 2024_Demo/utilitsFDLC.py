@@ -173,8 +173,9 @@ def eval_incorrect(labels, predicts, probs, data):
         if not correct:
             incorrect_examples.append((image, label, prob))    
 
-    return incorrect_examples.sort(reverse=True,
+    incorrect_examples.sort(reverse=True,
                             key=lambda x: torch.max(x[2], dim=0).values)
+    return incorrect_examples
 
 
 def plot_most_incorrect(incorrect, n_images, mean = MEAN, std = STD):
