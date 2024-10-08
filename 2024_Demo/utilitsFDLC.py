@@ -42,7 +42,8 @@ def set_root():
         home = str(Path.home())
         root_directory = os.path.join(home, 'data')
     return Path(root_directory)
-
+    
+#-----------------------------------
 def torch_set_device(): 
     print('torch version:',".".join(torch.__version__.split(".")[:2]))
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -59,13 +60,15 @@ def torch_set_device():
             print("MPS device")    
             
     return device, num_workers
-
+    
+#-----------------------------------
 def freeze_model(model):
     for name,p in model.named_parameters():
         if not name.startswith(('classifier','fc','head')):
             p.requires_grad = False
     return model
-
+    
+#-----------------------------------
 def replace_last_linear_layer(model, n_classes):
     
     *_,last = model.named_children()
@@ -100,7 +103,8 @@ def replace_last_linear_layer(model, n_classes):
        raise ValueError( f"Unexpected architecture of {last[0]},\n{last[1]}")
     
     return model
-
+    
+#-----------------------------------
 def print_trainable_parameters(model):
     trainable_params = 0
     all_param = 0
@@ -112,7 +116,7 @@ def print_trainable_parameters(model):
         f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param:.2f}"
     )
 
-
+#-----------------------------------
 def torch_imshow(inp, title=None, figsize=(28,18), mean = MEAN, std = STD):
     """Imshow for Tensor."""
     inp = inp.data.cpu().numpy().transpose((1, 2, 0))
@@ -127,7 +131,8 @@ def torch_imshow(inp, title=None, figsize=(28,18), mean = MEAN, std = STD):
         
     ax.set_axis_off()
     plt.show()
-
+    
+#-----------------------------------
 def plot_confusion_matrix(labels, pred_labels, names_classes, figsize=(18, 10)):
     
     fig, ax = plt.subplots(figsize=figsize)
@@ -139,6 +144,7 @@ def plot_confusion_matrix(labels, pred_labels, names_classes, figsize=(18, 10)):
     
     cm.plot(values_format='d', cmap='coolwarm', ax=ax)
 
+#-----------------------------------
 def eval_macro(model, data_loader, n_classes):
     
     predicts, labels, probs = [], [], []
@@ -155,8 +161,9 @@ def eval_macro(model, data_loader, n_classes):
     predicts = torch.cat(predicts, dim = 0) # make it 1d array
     probs    = torch.cat(probs, dim=0)
 
-    return labels, predicts, probs
-    
+    return labels.cpu(), predicts.cpu(), probs.cpu()
+
+#-----------------------------------
 def eval_micro(labels, predicts, n_classes):
     class_correct = torch.zeros(n_classes)
     class_total   = torch.zeros(n_classes)    
@@ -166,6 +173,7 @@ def eval_micro(labels, predicts, n_classes):
         class_total[yi]   += 1
     return class_correct, class_total
 
+#-----------------------------------
 def eval_incorrect(labels, predicts, probs, data):
     incorrect_examples = []
     corrects = torch.eq(labels, predicts)
@@ -177,7 +185,7 @@ def eval_incorrect(labels, predicts, probs, data):
                             key=lambda x: torch.max(x[2], dim=0).values)
     return incorrect_examples
 
-
+#-----------------------------------
 def plot_most_incorrect(incorrect, n_images, mean = MEAN, std = STD):
 
     rows = int(np.sqrt(n_images))
@@ -200,7 +208,7 @@ def plot_most_incorrect(incorrect, n_images, mean = MEAN, std = STD):
         ax.axis('off')
     fig.subplots_adjust(hspace=0.5)
 
-
+#-----------------------------------
 class ModelPL(pl.LightningModule):
     def __init__(self, model, lr=0.01, n_classes = 9):
         super().__init__()
@@ -254,3 +262,35 @@ class ModelPL(pl.LightningModule):
     def configure_optimizers(self):
         opt = torch.optim.Adam(self.model.parameters(), lr = self.lr)
         return opt
+
+#-----------------------------------
+def clean_memory():
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    
+    to_remove = set()
+    for k, v in globals().items():
+        if isinstance(v, (torch.nn.Module)):
+            to_remove.add(k)
+    for k in to_remove:
+        del globals()[k]
+    gc.collect()
+
+#-----------------------------------
+def test_cuda():
+    torch_version = ".".join(torch.__version__.split(".")[:2])
+    print('torch version:',torch_version)
+    
+    if device.type == 'cuda':
+        cuda_version  = torch.__version__.split("+")[-1]
+        print("cuda: ", cuda_version)
+    
+        n_devices = torch.cuda.device_count()
+        print('number of devices: %d'%(n_devices))
+    
+        for cnt_device in range(n_devices):
+            print(torch.cuda.get_device_name(cnt_device))
+            print('Memory Usage:')
+            print('Allocated:', round(torch.cuda.memory_allocated(cnt_device)/1024**3,1), 'GB')
+            print('Cached:   ', round(torch.cuda.memory_reserved(cnt_device)/1024**3,1), 'GB')
+        
