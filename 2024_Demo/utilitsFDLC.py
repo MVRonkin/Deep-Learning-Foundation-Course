@@ -212,14 +212,14 @@ def plot_most_incorrect(incorrect, n_images, mean = MEAN, std = STD):
 class ModelPL(pl.LightningModule):
     def __init__(self, lr=0.01, n_classes = 9):
         super().__init__()
-        
+
         self.lr = lr
         self.n_classes = n_classes
-        
+
         self.set_model(model)
-       
+
         self.criterion = nn.CrossEntropyLoss()
-        
+
         self.val_accuracy   = Accuracy(task="multiclass", num_classes=self.n_classes)
         self.test_accuracy  = Accuracy(task="multiclass", num_classes=self.n_classes)
         self.save_hyperparameters(ignore=['model'])
@@ -230,24 +230,24 @@ class ModelPL(pl.LightningModule):
 
     def forward(self, x):
         x = self.model(x)
-        return x        
-        
+        return x
+
     def any_step(self, batch, batch_idx):
         x, y = batch
         logits = self.forward(x)
         loss = self.criterion(logits, y)
         preds = torch.argmax(logits, dim=1)
-        return preds, loss        
-    
+        return preds, loss
+
     def training_step(self, batch, batch_idx):
         _, loss = self.any_step(batch, batch_idx)
         self.log("train_loss", loss)
         return loss
-    
+
     def validation_step(self, batch, batch_idx):
         x, y = batch
         preds, loss = self.any_step(batch, batch_idx)
-        
+
         self.val_accuracy.update(preds, y)
         self.log("val_loss", loss, prog_bar=True)
         self.log("val_acc", self.val_accuracy, prog_bar=True)
@@ -255,14 +255,14 @@ class ModelPL(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         x, y = batch
         preds, loss = self.any_step(batch, batch_idx)
-        
+
         self.val_accuracy.update(preds, y)
         self.log("test_loss", loss, prog_bar=True)
         self.log("test_acc", self.val_accuracy, prog_bar=True)
-        
+
     def predict_step(self, batch, batch_idx, dataloader_idx=0):
         return self(batch)
-        
+
     def configure_optimizers(self):
         opt = torch.optim.Adam(self.model.parameters(), lr = self.lr)
         return opt
@@ -297,4 +297,15 @@ def test_cuda():
             print('Memory Usage:')
             print('Allocated:', round(torch.cuda.memory_allocated(cnt_device)/1024**3,1), 'GB')
             print('Cached:   ', round(torch.cuda.memory_reserved(cnt_device)/1024**3,1), 'GB')
+
+#-----------------------------------
+def get_squeezenet_1_0(n_classes ):
+    model = torchvision.models.squeezenet1_0(weights=torchvision.models.squeezenet.SqueezeNet1_0_Weights.IMAGENET1K_V1)
+    model = freeze_model(model)
+    # UNUSUAL LAYER
+    model.classifier[1] = nn.Conv2d(512, n_classes, kernel_size=(1, 1), stride=(1, 1))
+    # INIT LAYER PARAMETERS
+    nn.init.xavier_uniform_(model.classifier[1].weight)
+    model.classifier[1].bias.data.fill_(0)
+    return model
         
