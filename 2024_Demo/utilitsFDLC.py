@@ -216,8 +216,6 @@ class ModelPL(pl.LightningModule):
         self.lr = lr
         self.n_classes = n_classes
 
-        self.set_model(model)
-
         self.criterion = nn.CrossEntropyLoss()
 
         self.val_accuracy   = Accuracy(task="multiclass", num_classes=self.n_classes)
