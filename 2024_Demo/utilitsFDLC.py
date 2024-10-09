@@ -313,7 +313,7 @@ def get_squeezenet_1_0(n_classes ):
 class ImageFolderDataset(pl.LightningDataModule):
     def __init__(self, batch_size=32, workers=0, dataset_dir = '', device = "cpu", pin_memory = False):
         super().__init__()
-        self.dataset_dir = dataset_dir
+        self.dataset_dir = Path(dataset_dir)
         self.batch = batch_size
         self.num_workers = workers
         self.device = device
