@@ -311,12 +311,13 @@ def get_squeezenet_1_0(n_classes ):
 
 #-----------------------------------
 class ImageFolderDataset(pl.LightningDataModule):
-    def __init__(self, batch_size=32, workers=0, dataset_dir = dataset_directory, device = "cpu"):
+    def __init__(self, batch_size=32, workers=0, dataset_dir = '', device = "cpu", pin_memory = False):
         super().__init__()
         self.dataset_dir = dataset_dir
         self.batch = batch_size
         self.num_workers = workers
         self.device = device
+        self.pin_memory = pin_memory
         self.g = torch.Generator(device = self.device )
         self.persistance = False
         if workers > 0:
@@ -334,7 +335,8 @@ class ImageFolderDataset(pl.LightningDataModule):
                                            shuffle=True,
                                            num_workers=self.num_workers,
                                            persistent_workers = self.persistance,
-                                           generator = self.g)
+                                           generator = self.g,
+                                           pin_memory = self.pin_memory)
     
     def test_dataloader(self):
         data = datasets.ImageFolder(self.dataset_dir  / 'test', self.test_transform)
@@ -342,7 +344,8 @@ class ImageFolderDataset(pl.LightningDataModule):
                                            batch_size=self.batch,
                                            shuffle=False,
                                            num_workers=self.num_workers,
-                                           persistent_workers = self.persistance)
+                                           persistent_workers = self.persistance,
+                                            pin_memory = self.pin_memory)
     
     def val_dataloader(self):
         data = datasets.ImageFolder(self.dataset_dir  / 'val',self.test_transform)
@@ -350,5 +353,6 @@ class ImageFolderDataset(pl.LightningDataModule):
                                            batch_size=self.batch,
                                            shuffle=False,
                                            num_workers=self.num_workers,
-                                           persistent_workers = self.persistance)
+                                           persistent_workers = self.persistance,
+                                            pin_memory = self.pin_memory)
         
