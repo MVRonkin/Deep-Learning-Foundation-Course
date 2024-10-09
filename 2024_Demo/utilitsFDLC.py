@@ -210,19 +210,23 @@ def plot_most_incorrect(incorrect, n_images, mean = MEAN, std = STD):
 
 #-----------------------------------
 class ModelPL(pl.LightningModule):
-    def __init__(self, model, lr=0.01, n_classes = 9):
+    def __init__(self, lr=0.01, n_classes = 9):
         super().__init__()
         
         self.lr = lr
         self.n_classes = n_classes
         
-        self.model = model
+        self.set_model(model)
        
         self.criterion = nn.CrossEntropyLoss()
         
         self.val_accuracy   = Accuracy(task="multiclass", num_classes=self.n_classes)
         self.test_accuracy  = Accuracy(task="multiclass", num_classes=self.n_classes)
         self.save_hyperparameters(ignore=['model'])
+
+    def set_model(self, torch_model  = None):
+        self.model = torch_model
+        return self
 
     def forward(self, x):
         x = self.model(x)
