@@ -324,6 +324,7 @@ class ImageFolderDataset(pl.LightningDataModule):
     def set_transforms(self,train_transform, test_transform):
         self.train_transform = train_transform
         self.test_transform = test_transform
+	return self
 
     def train_dataloader(self):
         data = datasets.ImageFolder(self.dataset_dir / 'train',self.train_transform)
