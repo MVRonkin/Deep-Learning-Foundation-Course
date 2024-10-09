@@ -308,4 +308,47 @@ def get_squeezenet_1_0(n_classes ):
     nn.init.xavier_uniform_(model.classifier[1].weight)
     model.classifier[1].bias.data.fill_(0)
     return model
+
+#-----------------------------------
+class ImageFolderDataset(pl.LightningDataModule):
+    def __init__(self, batch_size=32, workers=0, dataset_dir = dataset_directory, device = "cpu"):
+        super().__init__()
+        self.dataset_dir = dataset_dir
+        self.batch = batch_size
+        self.num_workers = workers
+        self.device = device
+        self.g = torch.Generator(device = self.device )
+        self.persistance = False
+        if workers > 0:
+            self.persistance = True
+
+    def set_transforms(self,train_transform, test_transform):
+        self.train_transform = train_transform
+        self.test_transform = test_transform
+
+    def train_dataloader(self):
+        data = datasets.ImageFolder(self.dataset_dir / 'train',self.train_transform)
+        self.names_classes = data.classes
+        return torch.utils.data.DataLoader(data,
+                                           batch_size=self.batch,
+                                           shuffle=True,
+                                           num_workers=self.num_workers,
+                                           persistent_workers = self.persistance,
+                                           generator = self.g)
+    
+    def test_dataloader(self):
+        data = datasets.ImageFolder(self.dataset_dir  / 'test', self.test_transform)
+        return torch.utils.data.DataLoader(data,
+                                           batch_size=self.batch,
+                                           shuffle=False,
+                                           num_workers=self.num_workers,
+                                           persistent_workers = self.persistance)
+    
+    def val_dataloader(self):
+        data = datasets.ImageFolder(self.dataset_dir  / 'val',self.test_transform)
+        return torch.utils.data.DataLoader(data,
+                                           batch_size=self.batch,
+                                           shuffle=False,
+                                           num_workers=self.num_workers,
+                                           persistent_workers = self.persistance)
         
