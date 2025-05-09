@@ -1,0 +1,86 @@
+\ProvidesPackage{style.sty}
+
+% \documentclass[a4paper,12pt]{book}
+% \documentclass[12pt]{extbook} 
+%https://u995.livejournal.com/5765.html
+%https://blog.golodnyj.ru/2007/07/latex-2.html
+
+
+\usepackage{geometry}
+\geometry{a4paper,top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm}
+\usepackage[onehalfspacing]{setspace}% 1,5 интервал
+
+%opening
+\usepackage[utf8x]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage[T2A]{fontenc}
+%\usepackage[russian]{babel} 
+\usepackage{enumerate}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{amsmath} % Equations
+\usepackage{amssymb} % Equations
+\usepackage{mathtext}
+
+\usepackage[unicode, pdftex]{hyperref} % for hyperref in content
+
+
+\usepackage[nottoc]{tocbibind}
+% \usepackage{natbib}
+% \usepackage{multibib}
+
+\usepackage{ulem} %underline
+
+
+%overfull
+\setlength{\emergencystretch}{2pt}
+\clubpenalties 5 10000 10000 10000 10000 0
+\overfullrule=10pt
+
+% http://www.gentoo.ru/node/9157
+\renewcommand{\figurename}{Рисунок}
+\RequirePackage{caption}
+\DeclareCaptionLabelSeparator{defffis}{ -- }
+\captionsetup{justification=centering,labelsep=defffis}
+
+
+\renewcommand{\contentsname}{Содержание}
+% \renewcommand{\bibname}{\Large\bfseries Список литературы}
+\renewcommand\refname{\centering СПИСОК ЛИТЕРАТУРЫ}
+
+\bibliographystyle{utf8gost705u}
+
+% \end{sloppypar}
+% \end{document}
+% % %%% https://habr.com/ru/post/120401/
+% % % Как и в прошлый раз, определяем как обрабатывать ключи
+% % \define@key{key}{mag}{\mag#1}
+
+% % %этот код, собственно, парсит входные параметры стиля
+% % \let\@tempa\@empty%
+% % \edef\@tempa{\@ptionlist{\@currname.\@currext}}%
+% % \@for\CurrentOption:=\@classoptionslist\do{%
+% %   \@ifundefined{KV@#2@\CurrentOption}{}{\edef\@tempa{\@tempa,\CurrentOption,}}}%
+% % \edef\@tempa{\noexpand\setkeys{key}{\@tempa}}%
+% % \@tempa%
+% % \AtEndOfPackage{\let\@unprocessedoptions\relax}%
+
+% % А это для того, чтобы поля не поехали ни в dvi, ни в pdf.
+% % Дело в том, что dvi и pdf иногда используют свои переменные, 
+% % причём некоторые измеряются в масштабируемых единицах (без true), а некоторые --- наоборот. 
+% % Из-за этого всё ползёт.
+% \global\setlength\paperheight  {297truemm}%
+% \global\setlength\paperwidth   {210truemm}%
+% \global\setlength\pdfpageheight{297truemm}%
+% \global\setlength\pdfpagewidth {210truemm}%
+% \global\setlength\textheight   {260truemm}%
+% \global\setlength\textwidth    {180truemm}%
+% \global\setlength\hoffset      {-1truein}%
+% \global\setlength\voffset      {-1truein}%
+% \global\setlength\pdfhorigin   {1truein}%
+% \global\setlength\pdfvorigin   {1truein}%
+% \global\setlength\oddsidemargin{15truemm}%
+% \global\setlength\topmargin    {5truemm}%
+% \global\setlength\leftskip     {0truemm}%
+% \global\setlength\rightskip    {0truemm}%
